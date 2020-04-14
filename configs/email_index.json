@@ -19,11 +19,6 @@
         "type": "text",
         "index": false,
         "store": true
-      },
-      "split": {
-        "type": "text",
-        "index": false,
-        "store": true
       }
     }
   }

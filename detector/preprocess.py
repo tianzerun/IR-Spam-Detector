@@ -25,6 +25,13 @@ class SpamLabel(Enum):
     def __repr__(self):
         return self.value
 
+    @staticmethod
+    def from_str(label):
+        for member in SpamLabel.__members__.values():
+            if member.value == label:
+                return member
+        return None
+
 
 class DataCategory(Enum):
     TRAIN = "train"
@@ -131,7 +138,7 @@ def read_emails(folder, file_prefix="inmail."):
         yield email_builder(file_path), filename
 
 
-def prepare_index_requests(email_generator, labels, index, train=0.8):
+def prepare_index_requests(email_generator, labels, index):
     counter = 0
     for mail, filename in email_generator:
         body = {
@@ -139,8 +146,7 @@ def prepare_index_requests(email_generator, labels, index, train=0.8):
             "_id": filename,
             "subject": mail.cleaned_subject,
             "content": mail.cleaned_body,
-            "label": str(labels.get(filename, SpamLabel.UNDECIDED)),
-            "split": "train"
+            "label": str(labels.get(filename, SpamLabel.UNDECIDED))
         }
         yield body
         counter += 1
@@ -170,5 +176,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    print(SpamLabel.from_str("spam"))
+    # main()
     # print(email_builder(Path("/Users/tianzerun/Desktop/CS6200/IR_data/trec07p/data/inmail.8")))
