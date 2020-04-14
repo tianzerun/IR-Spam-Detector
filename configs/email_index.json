@@ -1,0 +1,30 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "properties": {
+      "subject": {
+        "type": "text",
+        "fielddata": true,
+        "index_options": "positions"
+      },
+      "content": {
+        "type": "text",
+        "fielddata": true,
+        "index_options": "positions"
+      },
+      "label": {
+        "type": "text",
+        "index": false,
+        "store": true
+      },
+      "split": {
+        "type": "text",
+        "index": false,
+        "store": true
+      }
+    }
+  }
+}
