@@ -1,0 +1,25 @@
+- PART 1a - Manual Spam Words
+Test Logistic Regression model
+ROC - area under curve score: 0.7736277777931575
+Test Naive Bayes model
+ROC - area under curve score: 0.7541631254842143
+Test Decision Tree model
+ROC - area under curve score: 0.8257430254360054
+
+
+- PART 1b - Provided Spam Words
+Test Logistic Regression model
+ROC - area under curve score: 0.7876620684774736
+Test Naive Bayes model
+ROC - area under curve score: 0.7777436272786115
+Test Decision Tree model
+ROC - area under curve score: 0.8621816996976369
+
+
+- PART 2 - Uni-grams
+Test Logistic Regression model
+ROC - area under curve score: 0.996745213542915
+Test Naive Bayes model
+ROC - area under curve score: 0.9889404792042762
+Test Decision Tree model
+ROC - area under curve score: 0.9823051195481478

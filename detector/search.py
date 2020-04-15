@@ -8,6 +8,9 @@ from detector.preprocess import SpamLabel
 
 
 class EmailIndexSearchClient(object):
+    tf = "tf"
+    df = "df"
+
     def __init__(self, client, index):
         self._index = index
         self._labels = self._get_labels(client, index)
@@ -40,7 +43,7 @@ class EmailIndexSearchClient(object):
                 index=index,
                 fields=["content"],
                 ids=ids[p:p + size],
-                term_statistics=False,
+                term_statistics=True,
                 field_statistics=False,
                 offsets=False,
                 positions=False
@@ -49,16 +52,31 @@ class EmailIndexSearchClient(object):
                 freq_by_term = dict()
                 if "content" in doc["term_vectors"]:
                     for term, value in doc["term_vectors"]["content"]["terms"].items():
-                        freq_by_term[term] = value["term_freq"]
+                        freq_by_term[term] = {
+                            self.tf: value["term_freq"],
+                            self.df: value["doc_freq"]
+                        }
                     term_vectors[doc["_id"]] = freq_by_term
             p += size
         return term_vectors
 
     def get_term_freq(self, doc_id, term):
-        return 0 if doc_id not in self._term_vectors else self._term_vectors[doc_id].get(term, 0)
+        return 0 if doc_id not in self._term_vectors else self._term_vectors[doc_id].get(term, {}).get(self.tf, 0)
 
     def is_email_spam(self, doc_id):
         return self._labels.get(doc_id, SpamLabel.UNDECIDED) is SpamLabel.SPAM
+
+    def get_unigrams(self, min_df=0.02, max_df=0.95):
+        num_of_docs = len(self._labels)
+        min_doc_freq = int(num_of_docs * min_df)
+        max_doc_freq = int(num_of_docs * max_df)
+        unigrams = set()
+        for term_vector in self._term_vectors.values():
+            terms = [term for term, stats in term_vector.items()
+                     if min_doc_freq <= stats[self.df] <= max_doc_freq]
+            unigrams.update(set(terms))
+
+        return list(unigrams)
 
 
 def create_index(client, index, index_config):
