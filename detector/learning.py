@@ -6,18 +6,22 @@ import numpy as np
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.tree import DecisionTreeClassifier
 
 import detector.utils as utils
 from detector.search import EmailIndexSearchClient
 
 
 def train_model(X, y):
-    model = LogisticRegression(solver="lbfgs", class_weight="balanced")
-    model.fit(X, y)
-    return model
+    regression_model = LogisticRegression(solver="liblinear", class_weight="balanced", fit_intercept=True)
+    bayes_model = MultinomialNB()
+    tree_model = DecisionTreeClassifier()
+    tree_model.fit(X, y)
+    return tree_model
 
 
 def test_model(model, X, true_labels):
@@ -56,7 +60,8 @@ def read_spam_words(path, stop_words, stemmer):
                 parts = raw.split()
                 if len(parts) > 1:
                     # n-grams
-                    words.append(" ".join(stemmer.stem(w) for w in parts))
+                    continue
+                    # words.append(" ".join(stemmer.stem(w) for w in parts))
                 else:
                     # uni-gram
                     words.append(stemmer.stem(parts[0]))
