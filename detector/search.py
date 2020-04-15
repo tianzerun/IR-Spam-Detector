@@ -9,16 +9,16 @@ from detector.preprocess import SpamLabel
 
 class EmailIndexSearchClient(object):
     def __init__(self, client, index):
-        self.client = client
-        self.index = index
-        self._labels = self._get_labels()
-        self._term_vectors = self._get_term_vectors()
+        self._index = index
+        self._labels = self._get_labels(client, index)
+        self._term_vectors = self._get_term_vectors(client, index)
 
     @property
     def ids(self):
         return list(self._labels.keys())
 
-    def _get_labels(self):
+    @classmethod
+    def _get_labels(cls, client, index):
         f_id = "_id"
         f_label = "label"
         body = {
@@ -28,16 +28,16 @@ class EmailIndexSearchClient(object):
             "stored_fields": [f_id, f_label]
         }
         return {item[f_id]: SpamLabel.from_str(item["fields"][f_label][0])
-                for item in helpers.scan(self.client, index=self.index, query=body)}
+                for item in helpers.scan(client, index=index, query=body)}
 
-    def _get_term_vectors(self):
+    def _get_term_vectors(self, client, index):
         ids = list(self._labels.keys())
         term_vectors = dict()
         size = 50
         p = 0
         while p < len(ids):
-            res = self.client.mtermvectors(
-                index=self.index,
+            res = client.mtermvectors(
+                index=index,
                 fields=["content"],
                 ids=ids[p:p + size],
                 term_statistics=False,
@@ -47,14 +47,18 @@ class EmailIndexSearchClient(object):
             )
             for doc in res["docs"]:
                 freq_by_term = dict()
-                for term, value in doc["term_vectors"]["content"]["terms"].items():
-                    freq_by_term[term] = value["term_freq"]
-                term_vectors[doc["_id"]] = freq_by_term
+                if "content" in doc["term_vectors"]:
+                    for term, value in doc["term_vectors"]["content"]["terms"].items():
+                        freq_by_term[term] = value["term_freq"]
+                    term_vectors[doc["_id"]] = freq_by_term
             p += size
         return term_vectors
 
     def get_term_freq(self, doc_id, term):
         return 0 if doc_id not in self._term_vectors else self._term_vectors[doc_id].get(term, 0)
+
+    def is_email_spam(self, doc_id):
+        return self._labels.get(doc_id, SpamLabel.UNDECIDED) is SpamLabel.SPAM
 
 
 def create_index(client, index, index_config):

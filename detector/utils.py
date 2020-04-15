@@ -1,4 +1,5 @@
 import json
+import pickle
 
 
 def load_json(path):
@@ -6,3 +7,11 @@ def load_json(path):
         return json.load(fp)
 
 
+def dump_pickle(obj, path):
+    with path.open("wb") as fp:
+        pickle.dump(obj, fp)
+
+
+def load_pickle(path):
+    with path.open("rb") as fp:
+        return pickle.load(fp)

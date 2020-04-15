@@ -139,7 +139,6 @@ def read_emails(folder, file_prefix="inmail."):
 
 
 def prepare_index_requests(email_generator, labels, index):
-    counter = 0
     for mail, filename in email_generator:
         body = {
             "_index": index,
@@ -149,9 +148,6 @@ def prepare_index_requests(email_generator, labels, index):
             "label": str(labels.get(filename, SpamLabel.UNDECIDED))
         }
         yield body
-        counter += 1
-        if counter > 10:
-            break
 
 
 def create_args_parser():
@@ -176,6 +172,5 @@ def main():
 
 
 if __name__ == "__main__":
-    print(SpamLabel.from_str("spam"))
-    # main()
+    main()
     # print(email_builder(Path("/Users/tianzerun/Desktop/CS6200/IR_data/trec07p/data/inmail.8")))
